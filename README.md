@@ -1,6 +1,6 @@
 # Al Qaswa API
 
-Node 20+ · Express 5 · MongoDB (Mongoose) · JWT auth · Zod validation · Multer uploads.
+Node 20+ · Express 5 · MongoDB (Mongoose) · JWT auth · Zod validation · Multer uploads → Cloudinary (or ./uploads locally when Cloudinary keys are not set).
 
 ```bash
 cp .env.example .env   # MONGO_URI, JWT_SECRET, CLIENT_URL (comma-separated origins), ADMIN_EMAIL/PASSWORD
