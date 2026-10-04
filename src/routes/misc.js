@@ -3,6 +3,7 @@ import { z } from "zod";
 import Setting from "../models/Setting.js";
 import Subscriber from "../models/Subscriber.js";
 import Message from "../models/Message.js";
+import Slide from "../models/Slide.js";
 import { validate } from "../middleware/validate.js";
 
 const r = Router();
@@ -11,6 +12,10 @@ r.get("/settings", async (_req, res) => {
   const s = await Setting.get();
   const { storeName, announcement, shippingFee, freeShippingOver, whatsapp, phone, email, address, bankDetails, codEnabled, bankEnabled } = s;
   res.json({ storeName, announcement, shippingFee, freeShippingOver, whatsapp, phone, email, address, bankDetails, codEnabled, bankEnabled });
+});
+
+r.get("/slides", async (_req, res) => {
+  res.json({ items: await Slide.find({ active: true }).sort({ sort: 1, createdAt: 1 }).limit(10) });
 });
 
 r.post("/newsletter", validate(z.object({ email: z.email() })), async (req, res) => {

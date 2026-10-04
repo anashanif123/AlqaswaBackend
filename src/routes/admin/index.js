@@ -17,6 +17,7 @@ import Review from "../../models/Review.js";
 import Setting from "../../models/Setting.js";
 import Subscriber from "../../models/Subscriber.js";
 import Message from "../../models/Message.js";
+import Slide from "../../models/Slide.js";
 
 const r = Router();
 r.use(protect, adminOnly);
@@ -258,6 +259,15 @@ r.use("/messages", crud(Message, {
   update: z.object({ handled: z.boolean() }), search: ["name", "email", "phone"],
   filter: (q) => ({ ...(q.type && { type: q.type }), ...(q.handled && { handled: q.handled === "true" }) }),
 }));
+
+/* ---------------- Home carousel ---------------- */
+const slideCreate = z.object({
+  image: z.string().max(500).optional(), mobileImage: z.string().max(500).optional(), kicker: z.string().max(80).optional(),
+  title: z.string().min(2).max(120), subtitle: z.string().max(300).optional(), ctaLabel: z.string().max(40).optional(),
+  ctaLink: z.string().max(300).optional(), kind: z.enum(KINDS).optional(), tone: z.enum(["emerald", "rose", "sand"]).optional(),
+  sort: z.number().int().optional(), active: z.boolean().optional(),
+});
+r.use("/slides", crud(Slide, { create: slideCreate, update: slideCreate.partial(), search: ["title", "kicker"], sort: { sort: 1, createdAt: 1 } }));
 
 /* ---------------- Settings ---------------- */
 r.get("/settings", async (_req, res) => res.json({ item: await Setting.get() }));
