@@ -1,10 +1,8 @@
 import { Router } from "express";
 import { z } from "zod";
-import fs from "node:fs/promises";
-import path from "node:path";
 import { protect, adminOnly } from "../../middleware/auth.js";
 import { validate } from "../../middleware/validate.js";
-import { upload, UPLOAD_DIR } from "../../middleware/upload.js";
+import { upload, saveFile, removeFile } from "../../middleware/upload.js";
 import { AppError, notFound } from "../../utils/AppError.js";
 import { uniqueSlug } from "../../utils/slugify.js";
 import { crud } from "./crud.js";
@@ -279,13 +277,13 @@ r.put(
 );
 
 /* ---------------- Image upload ---------------- */
-r.post("/upload", upload.array("images", 10), (req, res) => {
+r.post("/upload", upload.array("images", 10), async (req, res) => {
   if (!req.files?.length) throw new AppError("No images received");
-  res.status(201).json({ urls: req.files.map((f) => `/uploads/${f.filename}`) });
+  res.status(201).json({ urls: await Promise.all(req.files.map(saveFile)) });
 });
-r.delete("/upload/:file", async (req, res) => {
-  const file = path.join(UPLOAD_DIR, path.basename(req.params.file));
-  await fs.unlink(file).catch(() => { throw notFound("File"); });
+/** Body: { url } — the URL returned by POST /upload. */
+r.delete("/upload", validate(z.object({ url: z.string().min(1) })), async (req, res) => {
+  await removeFile(req.body.url).catch(() => { throw notFound("File"); });
   res.json({ message: "File deleted" });
 });
 
